@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import json; f=open\\('/Users/hohyunglee/_vibe/todolist-app/swagger/swagger.json'\\); d=json.load\\(f\\); print\\('Valid JSON ✓'\\); print\\(f'Endpoints: {sum\\(len\\(v\\) for v in d[\\\\\"paths\\\\\"].values\\(\\)\\)}'\\); print\\(f'Schemas: {len\\(d[\\\\\"components\\\\\"][\\\\\"schemas\\\\\"]\\)}'\\)\")"
+    ]
+  }
+}
