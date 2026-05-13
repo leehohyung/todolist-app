@@ -23,7 +23,7 @@ const categoryController = {
   async deleteCategory(req, res, next) {
     try {
       const { categoryId } = req.params;
-      await categoryService.deleteCategory(req.userId, parseInt(categoryId, 10));
+      await categoryService.deleteCategory(req.userId, categoryId);
       res.status(204).send();
     } catch (err) {
       next(err);

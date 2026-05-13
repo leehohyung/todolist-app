@@ -5,7 +5,7 @@ const todoController = {
     try {
       const { categoryId, dueDate, isCompleted } = req.query;
       const filters = {};
-      if (categoryId) filters.categoryId = parseInt(categoryId, 10);
+      if (categoryId) filters.categoryId = categoryId;
       if (dueDate) filters.dueDate = dueDate;
       if (isCompleted !== undefined) filters.isCompleted = isCompleted === 'true';
       const todos = await todoService.getTodos(req.userId, filters);
@@ -29,7 +29,7 @@ const todoController = {
     try {
       const { todoId } = req.params;
       const { title, categoryId, dueDate, memo } = req.body;
-      const todo = await todoService.updateTodo(req.userId, parseInt(todoId, 10), {
+      const todo = await todoService.updateTodo(req.userId, todoId, {
         title,
         categoryId,
         dueDate,
@@ -44,7 +44,7 @@ const todoController = {
   async deleteTodo(req, res, next) {
     try {
       const { todoId } = req.params;
-      await todoService.deleteTodo(req.userId, parseInt(todoId, 10));
+      await todoService.deleteTodo(req.userId, todoId);
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -54,7 +54,7 @@ const todoController = {
   async toggleCompletion(req, res, next) {
     try {
       const { todoId } = req.params;
-      const todo = await todoService.toggleCompletion(req.userId, parseInt(todoId, 10));
+      const todo = await todoService.toggleCompletion(req.userId, todoId);
       res.json({ todo });
     } catch (err) {
       next(err);

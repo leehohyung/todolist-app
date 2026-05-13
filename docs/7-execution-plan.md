@@ -234,7 +234,7 @@ Phase 6: 통합 테스트 & 검증          (공통)
 - **Done When:**
   - [x] `src/db/pool.ts` 작성: `pg.Pool` 인스턴스 생성 (환경변수 기반)
   - [x] pool 에러 핸들러 등록 (`pool.on('error', ...)`)
-  - [ ] `src/server.ts`에서 시작 시 `SELECT 1` 연결 테스트 수행 (BE-P3-11에서 완료)
+  - [x] `src/server.js`에서 시작 시 `SELECT 1` 연결 테스트 수행
   - [x] DB 연결 성공/실패 로그 출력 (수동 테스트 완료: todolist_dev 연결 확인)
 
 ### BE-P2-02: UserRepository 구현
