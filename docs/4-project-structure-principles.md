@@ -145,7 +145,7 @@ Service A → Service B → Service A  (순환)
 **검증 방법:**
 - 모듈 import 그래프를 정기적으로 시각화
 - PR 리뷰 시 새 의존성 추가 확인
-- TypeScript 컴파일 시 순환 참조 감지 도구 사용
+- 모듈 import 경로 시각화 도구(madge 등) 사용
 
 ---
 
@@ -159,8 +159,8 @@ Service A → Service B → Service A  (순환)
 - pg 파라미터 바인딩($1, $2 등)으로 SQL Injection 원천 차단
 
 **필수 구현:**
-```typescript
-// 예: userRepository.ts
+```javascript
+// 예: user-repository.js
 const query = 'SELECT user_id, email, name FROM users WHERE email = $1';
 const result = await pool.query(query, [email]);
 // snake_case DB 결과를 camelCase로 매핑
@@ -315,13 +315,13 @@ export const MESSAGES = {
 
 ### P-NAM-01: 파일 네이밍 컨벤션
 
-**백엔드 (kebab-case):**
+**백엔드 (kebab-case, `.js`):**
 ```
-user-controller.ts
-user-service.ts
-user-repository.ts
-auth-middleware.ts
-jwt-utils.ts
+user-controller.js
+user-service.js
+user-repository.js
+auth-middleware.js
+jwt-utils.js
 ```
 
 **프론트엔드:**
@@ -349,26 +349,26 @@ jwt-utils.ts
 ### P-NAM-02: 변수/함수 네이밍
 
 **Camel Case 원칙:**
-```typescript
+```javascript
 // 함수
-function getUserById(userId: string) { }
-function createTodo(title: string, categoryId: string) { }
+function getUserById(userId) { }
+function createTodo(title, categoryId) { }
 
 // 변수
 const userId = 'abc123';
-const todoList: Todo[] = [];
+const todoList = [];
 const maxRetries = 3;
 ```
 
 **Boolean 변수: is/has 접두사 필수**
-```typescript
+```javascript
 const isCompleted = true;
 const hasError = false;
 const isLoading = true;
 const hasAuthToken = false;
 ```
 
-**이벤트 핸들러: handle 접두사**
+**이벤트 핸들러: handle 접두사 (프론트엔드)**
 ```typescript
 const handleTodoDelete = (todoId: string) => { };
 const handleFilterChange = (newFilter: Filter) => { };
@@ -376,30 +376,30 @@ const handleSubmit = (e: React.FormEvent) => { };
 ```
 
 **Promise/Async 함수: 명사로 시작**
-```typescript
+```javascript
 // ✅ 올바른 예
 const fetchUserData = async () => { };
-const saveTodo = async (todo: Todo) => { };
+const saveTodo = async (todo) => { };
 
 // ❌ 금지된 예
 const loadUserData = async () => { }; // "fetch" 또는 "get" 사용
-const writeTodo = async (todo: Todo) => { }; // "save" 또는 "create" 사용
+const writeTodo = async (todo) => { }; // "save" 또는 "create" 사용
 ```
 
 ---
 
 ### P-NAM-03: DB 컬럼명 ↔ JS 객체 변환
 
-**선언:** 데이터베이스는 snake_case 컬럼명을 사용하고, JavaScript/TypeScript는 camelCase 속성명을 사용한다. 변환은 **Repository 레이어에서만** 수행한다.
+**선언:** 데이터베이스는 snake_case 컬럼명을 사용하고, JavaScript는 camelCase 속성명을 사용한다. 변환은 **Repository 레이어에서만** 수행한다.
 
 **변환 위치:**
 
-```typescript
+```javascript
 // ✅ repository에서만 변환
-export const getUserById = async (userId: string): Promise<User> => {
+const getUserById = async (userId) => {
   const query = 'SELECT user_id, email, name, created_at FROM users WHERE user_id = $1';
   const result = await pool.query(query, [userId]);
-  
+
   // snake_case → camelCase 변환 (여기서만!)
   return {
     userId: result.rows[0].user_id,
@@ -410,7 +410,7 @@ export const getUserById = async (userId: string): Promise<User> => {
 };
 
 // ❌ Service, Controller에서 변환 금지
-export const getUserService = async (userId: string) => {
+const getUserService = async (userId) => {
   const user = await userRepository.getUserById(userId);
   // user는 이미 camelCase여야 함
   return user;
@@ -488,18 +488,20 @@ PATCH  /api/v1/todos/:todoId/complete # 할일 완료 상태 토글
 **선언:** 모든 상수는 UPPER_SNAKE_CASE를 사용한다.
 
 **백엔드 예시:**
-```typescript
-// constants/auth.ts
-export const JWT_ACCESS_TOKEN_EXPIRY = '1h';
-export const JWT_REFRESH_TOKEN_EXPIRY = '7d';
-export const PASSWORD_MIN_LENGTH = 8;
-export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+```javascript
+// constants/auth.js
+const JWT_ACCESS_TOKEN_EXPIRY = '1h';
+const JWT_REFRESH_TOKEN_EXPIRY = '7d';
+const PASSWORD_MIN_LENGTH = 8;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// constants/defaults.ts
-export const DEFAULT_CATEGORY_NAMES = ['업무', '개인', '쇼핑'];
-export const DEFAULT_PERSONAL_CATEGORY = '개인';
-export const MAX_CATEGORY_NAME_LENGTH = 100;
-export const MAX_TODO_TITLE_LENGTH = 255;
+// constants/defaults.js
+const DEFAULT_CATEGORY_NAMES = ['업무', '개인', '쇼핑'];
+const DEFAULT_PERSONAL_CATEGORY = '개인';
+const MAX_CATEGORY_NAME_LENGTH = 100;
+const MAX_TODO_TITLE_LENGTH = 255;
+
+module.exports = { JWT_ACCESS_TOKEN_EXPIRY, JWT_REFRESH_TOKEN_EXPIRY, PASSWORD_MIN_LENGTH, EMAIL_REGEX };
 ```
 
 **프론트엔드 예시:**
@@ -520,17 +522,18 @@ export const TIME_FORMAT = 'HH:mm:ss';
 
 ---
 
-### P-NAM-06: TypeScript 타입 네이밍
+### P-NAM-06: 프론트엔드 TypeScript 타입 네이밍
+
+> **적용 범위:** 프론트엔드(React + TypeScript)에만 적용. 백엔드는 JavaScript를 사용하므로 타입 선언 불필요.
 
 **선언:** 타입과 인터페이스는 PascalCase를 사용하며, I 접두사(Hungarian notation) 절대 금지. 도메인 정의서의 엔티티명을 그대로 사용.
 
-**올바른 예:**
+**올바른 예 (프론트엔드):**
 ```typescript
 // User 엔티티 타입
 interface User {
   userId: string;
   email: string;
-  password: string;
   name: string;
   createdAt: Date;
   updatedAt: Date;
@@ -548,19 +551,6 @@ type Todo = {
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-};
-
-// 요청/응답 타입 (Request/Response 접미사)
-interface CreateTodoRequest {
-  title: string;
-  description?: string;
-  categoryId: string;
-  dueDate?: string;
-}
-
-type CreateTodoResponse = {
-  todoId: string;
-  message: string;
 };
 
 // 열거형
@@ -611,23 +601,23 @@ interface TodoEntity { } // 대신 Todo 사용
 
 ### P-TEST-02: 테스트 파일 위치
 
-**선언:** 테스트 파일은 테스트 대상 파일과 동일 디렉토리에 위치하며, `.test.ts` 또는 `.spec.ts` 확장자를 사용한다.
+**선언:** 테스트 파일은 테스트 대상 파일과 동일 디렉토리에 위치한다. 백엔드는 `.test.js`, 프론트엔드는 `.test.ts` 확장자를 사용한다.
 
-**백엔드 구조:**
+**백엔드 구조 (JavaScript):**
 ```
 src/
   services/
-    user-service.ts
-    user-service.test.ts
-    todo-service.ts
-    todo-service.test.ts
+    user-service.js
+    user-service.test.js
+    todo-service.js
+    todo-service.test.js
   repositories/
-    user-repository.ts
-    user-repository.test.ts
+    user-repository.js
+    user-repository.test.js
   __tests__/
     integration/
-      auth-api.test.ts
-      todo-api.test.ts
+      auth-api.test.js
+      todo-api.test.js
 ```
 
 **프론트엔드 구조:**
@@ -1490,81 +1480,68 @@ export const TodoListPage: React.FC = () => {
 backend/
   src/
     routes/                   # Express 라우터 (엔드포인트 정의)
-      index.ts              # 라우터 병합
-      auth-routes.ts        # POST /auth/register, POST /auth/login, POST /auth/refresh
-      category-routes.ts    # GET /categories, POST /categories, DELETE /categories/:id
-      todo-routes.ts        # GET /todos, POST /todos, PATCH /todos/:id, DELETE, /complete
-      user-routes.ts        # PATCH /users/me
+      index.js              # 라우터 병합
+      auth-routes.js        # POST /auth/register, POST /auth/login, POST /auth/refresh
+      category-routes.js    # GET /categories, POST /categories, DELETE /categories/:id
+      todo-routes.js        # GET /todos, POST /todos, PATCH /todos/:id, DELETE, /complete
+      user-routes.js        # PATCH /users/me
     
     controllers/              # HTTP 요청/응답 처리 (라우터와 서비스 사이)
-      auth-controller.ts    # POST /register, /login, /refresh 처리 로직
-      category-controller.ts # GET, POST, DELETE 요청 파싱 및 응답 직렬화
-      todo-controller.ts    # TODO CRUD, 완료 처리 요청 처리
-      user-controller.ts    # PATCH /users/me 요청 처리
+      auth-controller.js    # POST /register, /login, /refresh 처리 로직
+      category-controller.js # GET, POST, DELETE 요청 파싱 및 응답 직렬화
+      todo-controller.js    # TODO CRUD, 완료 처리 요청 처리
+      user-controller.js    # PATCH /users/me 요청 처리
     
     services/                 # 비즈니스 로직 (도메인 규칙 적용)
-      user-service.ts       # 회원가입, 로그인, 개인정보 수정 비즈니스 로직
-      auth-service.ts       # JWT 발급, 토큰 검증
-      category-service.ts   # 카테고리 CRUD, 기본 카테고리 관리
-      todo-service.ts       # 할일 CRUD, 필터링, 완료 처리 로직
+      user-service.js       # 회원가입, 로그인, 개인정보 수정 비즈니스 로직
+      auth-service.js       # JWT 발급, 토큰 검증
+      category-service.js   # 카테고리 CRUD, 기본 카테고리 관리
+      todo-service.js       # 할일 CRUD, 필터링, 완료 처리 로직
     
     repositories/             # DB 접근 (pg 직접 사용)
-      user-repository.ts    # users 테이블 쿼리
-      category-repository.ts # categories 테이블 쿼리
-      todo-repository.ts    # todos 테이블 쿼리
-      base-repository.ts    # DB 연결 풀 관리
+      user-repository.js    # users 테이블 쿼리
+      category-repository.js # categories 테이블 쿼리
+      todo-repository.js    # todos 테이블 쿼리
     
     middlewares/              # Express 미들웨어
-      auth-middleware.ts    # JWT 토큰 검증
-      error-handler.ts      # 에러 처리 (try-catch 통합)
-      request-logger.ts     # 요청 로깅 (민감 정보 제외)
-      cors-middleware.ts    # CORS 설정 (app.ts에서도 사용)
+      auth-middleware.js    # JWT 토큰 검증
+      error-handler.js      # 에러 처리 (try-catch 통합)
+      request-logger.js     # 요청 로깅 (민감 정보 제외)
     
     db/                       # 데이터베이스 설정
-      pool.ts               # pg Pool 생성 및 설정
+      pool.js               # pg Pool 생성 및 설정
       migrations/           # SQL 마이그레이션 파일
         001-create-users.sql
         002-create-categories.sql
         003-create-todos.sql
         004-init-default-categories.sql
     
-    types/                    # TypeScript 타입
-      user.ts               # User, UserRequest, UserResponse 타입
-      todo.ts               # Todo, CreateTodoRequest, UpdateTodoRequest 등
-      category.ts           # Category, CreateCategoryRequest
-      common.ts             # ApiResponse, ApiError 등 공통 타입
-    
     utils/                    # 유틸리티 함수
-      jwt-utils.ts          # JWT 발급, 검증 함수
-      password-utils.ts     # bcrypt 암호화, 비교
-      date-utils.ts         # 날짜 포맷, 비교
-      validation.ts         # 이메일, 비밀번호, 필드 검증
+      jwt-utils.js          # JWT 발급, 검증 함수
+      password-utils.js     # bcrypt 암호화, 비교
+      date-utils.js         # 날짜 포맷, 비교
+      validation.js         # 이메일, 비밀번호, 필드 검증
     
     constants/                # 상수
-      error-codes.ts        # ERROR_CODES 객체
-      messages.ts           # 에러/성공 메시지
-      defaults.ts           # DEFAULT_CATEGORY_NAMES 등
-      validation.ts         # 정규식, 최소/최대 길이
+      error-codes.js        # ERROR_CODES 객체
+      messages.js           # 에러/성공 메시지
+      defaults.js           # DEFAULT_CATEGORY_NAMES 등
+      validation.js         # 정규식, 최소/최대 길이
     
-    app.ts                   # Express 앱 설정 (미들웨어 등록, 라우터 마운트)
-    server.ts               # 포트 리스닝, 진입점
-  
-  migrations/                 # SQL 마이그레이션 (도구 사용 시)
-    001-init.sql
-    002-add-column.sql
+    app.js                   # Express 앱 설정 (미들웨어 등록, 라우터 마운트)
+    server.js               # 포트 리스닝, 진입점
   
   __tests__/                  # 테스트 코드
     unit/
       services/
-        user-service.test.ts
-        todo-service.test.ts
+        user-service.test.js
+        todo-service.test.js
     integration/
-      auth-api.test.ts
-      todo-api.test.ts
+      auth-api.test.js
+      todo-api.test.js
   
   .env.example               # 필수 환경변수 템플릿
   package.json
-  tsconfig.json
   jest.config.js            # 테스트 설정
 ```
 
@@ -1804,7 +1781,7 @@ export default app;
 | | P-NAM-05 | 상수 | UPPER_SNAKE_CASE |
 | | P-NAM-06 | 타입 네이밍 | PascalCase, I 접두사 금지 |
 | **테스트** | P-TEST-01 | 테스트 범위 | Service: 단위, API: 통합 |
-| | P-TEST-02 | 테스트 위치 | 대상 파일과 동일 디렉토리, .test.ts |
+| | P-TEST-02 | 테스트 위치 | 대상 파일과 동일 디렉토리, 백엔드 .test.js / 프론트엔드 .test.ts |
 | | P-TEST-03 | Repository 테스트 | 테스트 DB 또는 pg mock, ORM mock 금지 |
 | | P-TEST-04 | 커버리지 | Service 80%, Repository 70%, CI 강제 |
 | | P-TEST-05 | 자동화 도구 | ESLint + Prettier 필수 |
