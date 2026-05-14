@@ -17,8 +17,8 @@ const todoController = {
 
   async createTodo(req, res, next) {
     try {
-      const { title, categoryId, dueDate, memo } = req.body;
-      const todo = await todoService.createTodo(req.userId, { title, categoryId, dueDate, memo });
+      const { title, categoryId, dueDate, description } = req.body;
+      const todo = await todoService.createTodo(req.userId, { title, categoryId, dueDate, description });
       res.status(201).json({ todo });
     } catch (err) {
       next(err);
@@ -28,12 +28,12 @@ const todoController = {
   async updateTodo(req, res, next) {
     try {
       const { todoId } = req.params;
-      const { title, categoryId, dueDate, memo } = req.body;
+      const { title, categoryId, dueDate, description } = req.body;
       const todo = await todoService.updateTodo(req.userId, todoId, {
         title,
         categoryId,
         dueDate,
-        memo,
+        description,
       });
       res.json({ todo });
     } catch (err) {

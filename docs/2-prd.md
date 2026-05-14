@@ -140,7 +140,7 @@ TodoListApp은 인증 기반의 개인 할일 관리 웹 플랫폼이다. 20대~
 ## 5. API 설계 개요 (REST)
 
 ### 기본 규칙
-- Base URL: `/api/v1`
+- Base URL: `/api`
 - 인증 필요 엔드포인트: `Authorization: Bearer <access_token>` 헤더 필수
 - 응답 형식: JSON
 - 에러 응답: `{ "error": { "code": "...", "message": "..." } }`

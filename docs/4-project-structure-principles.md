@@ -216,7 +216,7 @@ const TodoListBad: React.FC = () => {
   const [todos, setTodos] = useState([]);
   useEffect(() => {
     // API 호출을 컴포넌트에서 직접 수행
-    fetch('/api/v1/todos')
+    fetch('/api/todos')
       .then((res) => res.json())
       .then((data) => setTodos(data));
   }, []);
@@ -446,39 +446,39 @@ CREATE TABLE todos (
 
 ### P-NAM-04: REST API URL 네이밍
 
-**선언:** 모든 REST API 엔드포인트는 kebab-case 복수형 명사를 사용하며, 버전 프리픽스 `/api/v1`을 포함한다.
+**선언:** 모든 REST API 엔드포인트는 kebab-case 복수형 명사를 사용하며, 프리픽스 `/api`를 포함한다.
 
 **형식:**
 ```
-/api/v1/[resource-name]
-/api/v1/[resource-name]/:resourceId
-/api/v1/[resource-name]/:resourceId/[sub-resource]
+/api/[resource-name]
+/api/[resource-name]/:resourceId
+/api/[resource-name]/:resourceId/[sub-resource]
 ```
 
 **구체 예시:**
 ```
-POST   /api/v1/auth/register          # 회원가입
-POST   /api/v1/auth/login             # 로그인
-POST   /api/v1/auth/refresh           # 토큰 재발급
-PATCH  /api/v1/users/me               # 개인정보 수정
+POST   /api/auth/register          # 회원가입
+POST   /api/auth/login             # 로그인
+POST   /api/auth/refresh           # 토큰 재발급
+PATCH  /api/users/me               # 개인정보 수정
 
-GET    /api/v1/categories             # 카테고리 목록 조회
-POST   /api/v1/categories             # 카테고리 생성
-DELETE /api/v1/categories/:categoryId # 카테고리 삭제
+GET    /api/categories             # 카테고리 목록 조회
+POST   /api/categories             # 카테고리 생성
+DELETE /api/categories/:categoryId # 카테고리 삭제
 
-GET    /api/v1/todos                  # 할일 목록 조회 (필터 쿼리: ?categoryId=...&startDate=...&isCompleted=...)
-POST   /api/v1/todos                  # 할일 생성
-PATCH  /api/v1/todos/:todoId          # 할일 수정
-DELETE /api/v1/todos/:todoId          # 할일 삭제
-PATCH  /api/v1/todos/:todoId/complete # 할일 완료 상태 토글
+GET    /api/todos                  # 할일 목록 조회 (필터 쿼리: ?categoryId=...&dueDate=...&isCompleted=...)
+POST   /api/todos                  # 할일 생성
+PATCH  /api/todos/:todoId          # 할일 수정
+DELETE /api/todos/:todoId          # 할일 삭제
+PATCH  /api/todos/:todoId/complete # 할일 완료 상태 토글
 ```
 
 **금지 패턴:**
 ```
-❌ /api/v1/todo (단수형)
-❌ /api/v1/getTodos (동사)
-❌ /api/v1/todos/update/:todoId (동사)
-❌ /api/v1/categories/123 (숫자 ID 대신 UUID 사용)
+❌ /api/todo (단수형)
+❌ /api/getTodos (동사)
+❌ /api/todos/update/:todoId (동사)
+❌ /api/categories/123 (숫자 ID 대신 UUID 사용)
 ```
 
 ---
@@ -507,7 +507,7 @@ module.exports = { JWT_ACCESS_TOKEN_EXPIRY, JWT_REFRESH_TOKEN_EXPIRY, PASSWORD_M
 **프론트엔드 예시:**
 ```typescript
 // constants/api.ts
-export const API_BASE_URL = 'https://api.example.com/api/v1';
+export const API_BASE_URL = 'https://api.example.com/api';
 export const REQUEST_TIMEOUT_MS = 30000;
 
 // constants/filter.ts
@@ -804,7 +804,7 @@ NODE_ENV=development
 CORS_ORIGIN=http://localhost:3000,http://localhost:5173
 
 # Frontend
-VITE_API_BASE_URL=http://localhost:3000/api/v1
+VITE_API_BASE_URL=http://localhost:3000/api
 ```
 
 **.gitignore:**
@@ -1375,7 +1375,7 @@ client.interceptors.response.use(
       const { refreshToken, setTokens, clearTokens } = useAuthStore.getState();
       if (!refreshToken) { clearTokens(); return Promise.reject(error); }
       try {
-        const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, { refreshToken });
+        const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, { refreshToken }); // VITE_API_BASE_URL=http://localhost:3000/api
         setTokens(data.accessToken, data.refreshToken, data.userId);
         error.config.headers.Authorization = `Bearer ${data.accessToken}`;
         return client(error.config);
@@ -1746,9 +1746,9 @@ app.use(express.json());
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') }));
 
 // 라우터
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/categories', authMiddleware, categoryRoutes);
-app.use('/api/v1/todos', authMiddleware, todoRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/categories', authMiddleware, categoryRoutes);
+app.use('/api/todos', authMiddleware, todoRoutes);
 
 // 에러 핸들러 (마지막)
 app.use(errorHandler);
@@ -1777,7 +1777,7 @@ export default app;
 | **네이밍** | P-NAM-01 | 파일명 컨벤션 | 백엔드: kebab-case, 컴포넌트: PascalCase, 훅: camelCase |
 | | P-NAM-02 | 변수 네이밍 | camelCase, Boolean: is/has, 이벤트: handle |
 | | P-NAM-03 | DB 변환 위치 | snake_case ↔ camelCase는 Repository에서만 |
-| | P-NAM-04 | API URL | /api/v1/[resource-name], kebab-case, 복수형 |
+| | P-NAM-04 | API URL | /api/[resource-name], kebab-case, 복수형 |
 | | P-NAM-05 | 상수 | UPPER_SNAKE_CASE |
 | | P-NAM-06 | 타입 네이밍 | PascalCase, I 접두사 금지 |
 | **테스트** | P-TEST-01 | 테스트 범위 | Service: 단위, API: 통합 |

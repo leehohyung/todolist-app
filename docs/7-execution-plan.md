@@ -169,7 +169,7 @@ Phase 6: 통합 테스트 & 검증          (공통)
 #### FE-P1-04: 환경변수 설정
 - **의존성:** FE-P1-01
 - **Done When:**
-  - [ ] `.env.example` 생성: `VITE_API_BASE_URL=http://localhost:3000/api/v1`
+  - [ ] `.env.example` 생성: `VITE_API_BASE_URL=http://localhost:3000/api`
   - [ ] `.env.local` 생성 및 값 설정 (`.gitignore`에 포함 확인)
 
 #### FE-P1-05: CSS Custom Properties (테마 변수) 설정
