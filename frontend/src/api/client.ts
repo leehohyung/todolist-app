@@ -29,7 +29,11 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    const isAuthEndpoint =
+      originalRequest.url?.includes(API_ENDPOINTS.AUTH.LOGIN) ||
+      originalRequest.url?.includes(API_ENDPOINTS.AUTH.REGISTER);
+
+    if (error.response?.status !== 401 || originalRequest._retry || isAuthEndpoint) {
       return Promise.reject(error);
     }
 

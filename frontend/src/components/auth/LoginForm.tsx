@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useLogin } from '../../hooks/auth/useLogin';
 import { useUiStore } from '../../stores/ui-store';
 import { validateEmail, validatePassword } from '../../utils/validate';
-import { VALIDATION } from '../../constants/messages';
+import { AUTH } from '../../constants/messages';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
@@ -27,8 +27,9 @@ const LoginForm = () => {
     login.mutate(
       { email, password },
       {
-        onError: () => {
-          addToast('error', VALIDATION.NETWORK_ERROR);
+        onError: (err: unknown) => {
+          const status = (err as { response?: { status?: number } })?.response?.status;
+          addToast('error', status === 401 ? AUTH.LOGIN_FAILED : AUTH.LOGIN_FAILED);
         },
       },
     );

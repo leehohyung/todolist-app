@@ -1,5 +1,67 @@
 @import "tailwindcss";
 
+/* ── Tailwind v4 커스텀 테마 ── */
+@theme {
+  /* 컬러 */
+  --color-accent:   #3b82f6;
+  --color-success:  #22c55e;
+  --color-danger:   #ef4444;
+  --color-warning:  #f59e0b;
+
+  --color-bg-primary:   #ffffff;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-card:      #ffffff;
+
+  --color-text-primary:   #1a1a2e;
+  --color-text-secondary: #6b7280;
+  --color-text-muted:     #9ca3af;
+
+  --color-border:       #e5e7eb;
+  --color-border-focus: #3b82f6;
+
+  --color-cat-blue:   #93c5fd;
+  --color-cat-green:  #86efac;
+  --color-cat-yellow: #fde68a;
+  --color-cat-purple: #c4b5fd;
+  --color-cat-pink:   #f9a8d4;
+  --color-cat-orange: #fdba74;
+  --color-cat-teal:   #5eead4;
+
+  /* 그림자 */
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.10);
+  --shadow-lg:   0 8px 24px rgba(0,0,0,0.12);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.06);
+
+  /* 모서리 반경 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* 폰트 크기 */
+  --text-xs:  0.75rem;
+  --text-sm:  0.875rem;
+  --text-md:  1rem;
+  --text-lg:  1.125rem;
+  --text-xl:  1.375rem;
+  --text-2xl: 1.75rem;
+
+  /* 애니메이션 */
+  --animate-fade-in:  fade-in 200ms ease-out;
+  --animate-slide-up: slide-up 250ms ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
 /* ── 기본 리셋 ── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -14,25 +76,6 @@ body {
   background-color: #f8f9fa;
   -webkit-font-smoothing: antialiased;
 }
-
-/* CSS Custom Properties (다크 모드 2차 예비 구조) */
-:root {
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8f9fa;
-  --color-text-primary: #1a1a2e;
-  --color-text-secondary: #6b7280;
-  --color-border: #e5e7eb;
-  --color-accent: #3b82f6;
-  --color-danger: #ef4444;
-  --color-success: #22c55e;
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-}
-
-[data-theme="dark"] {}
 
 /* ── 스크롤바 (데스크톱 Webkit) ── */
 ::-webkit-scrollbar        { width: 6px; height: 6px; }
