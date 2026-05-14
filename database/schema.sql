@@ -55,7 +55,7 @@ CREATE TABLE todos (
     category_id  UUID         NOT NULL,
     title        VARCHAR(255) NOT NULL,
     description  TEXT,                                 -- NULL 허용
-    due_date     DATE,                                 -- NULL 허용
+    due_date     TIMESTAMP,                               -- NULL 허용
     is_completed BOOLEAN      NOT NULL DEFAULT false,
     completed_at TIMESTAMPTZ,                          -- NULL: 미완료, 값 있음: 완료 일시
     created_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),

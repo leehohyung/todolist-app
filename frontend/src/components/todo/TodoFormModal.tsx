@@ -14,9 +14,10 @@ interface TodoFormModalProps {
   onClose: () => void;
   editTodo?: Todo;
   categories: Category[];
+  defaultDueDate?: string;
 }
 
-const TodoFormModal = ({ isOpen, onClose, editTodo, categories }: TodoFormModalProps) => {
+const TodoFormModal = ({ isOpen, onClose, editTodo, categories, defaultDueDate }: TodoFormModalProps) => {
   const isEdit = !!editTodo;
   const createTodo = useCreateTodo();
   const updateTodo = useUpdateTodo();
@@ -26,6 +27,7 @@ const TodoFormModal = ({ isOpen, onClose, editTodo, categories }: TodoFormModalP
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [dueTime, setDueTime] = useState('');
   const [titleError, setTitleError] = useState('');
   const [categoryError, setCategoryError] = useState('');
 
@@ -34,11 +36,21 @@ const TodoFormModal = ({ isOpen, onClose, editTodo, categories }: TodoFormModalP
       setTitle(editTodo?.title ?? '');
       setDescription(editTodo?.description ?? '');
       setCategoryId(editTodo?.categoryId ?? (categories[0]?.categoryId ?? ''));
-      setDueDate(editTodo?.dueDate ? editTodo.dueDate.slice(0, 10) : '');
       setTitleError('');
       setCategoryError('');
+
+      const rawDate = editTodo?.dueDate ?? (defaultDueDate ?? '');
+      const dateOnly = rawDate ? rawDate.slice(0, 10) : '';
+      const timeOnly = rawDate && rawDate.length > 10 ? (() => {
+        const d = new Date(rawDate);
+        const h = d.getUTCHours();
+        const m = d.getUTCMinutes();
+        return (h !== 0 || m !== 0) ? `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}` : '';
+      })() : '';
+      setDueDate(dateOnly);
+      setDueTime(timeOnly);
     }
-  }, [isOpen, editTodo, categories]);
+  }, [isOpen, editTodo, categories, defaultDueDate]);
 
   const validate = () => {
     const tErr = validateTodoTitle(title);
@@ -58,7 +70,7 @@ const TodoFormModal = ({ isOpen, onClose, editTodo, categories }: TodoFormModalP
       title: title.trim(),
       categoryId,
       description: description.trim() || undefined,
-      dueDate: dueDate || undefined,
+      dueDate: dueDate ? `${dueDate}T${dueTime || '00:00'}:00` : undefined,
     };
 
     if (isEdit && editTodo) {
@@ -103,28 +115,28 @@ const TodoFormModal = ({ isOpen, onClose, editTodo, categories }: TodoFormModalP
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <label htmlFor="todo-category" className="block text-sm font-medium text-text-primary">
-              카테고리<span className="ml-1 text-danger" aria-hidden="true">*</span>
-            </label>
-            <select
-              id="todo-category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              aria-invalid={!!categoryError}
-              className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
-            >
-              <option value="">선택</option>
-              {categories.map((c) => (
-                <option key={c.categoryId} value={c.categoryId}>{c.name}</option>
-              ))}
-            </select>
-            {categoryError && (
-              <p role="alert" className="text-xs text-danger">{categoryError}</p>
-            )}
-          </div>
+        <div className="space-y-1.5">
+          <label htmlFor="todo-category" className="block text-sm font-medium text-text-primary">
+            카테고리<span className="ml-1 text-danger" aria-hidden="true">*</span>
+          </label>
+          <select
+            id="todo-category"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            aria-invalid={!!categoryError}
+            className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+          >
+            <option value="">선택</option>
+            {categories.map((c) => (
+              <option key={c.categoryId} value={c.categoryId}>{c.name}</option>
+            ))}
+          </select>
+          {categoryError && (
+            <p role="alert" className="text-xs text-danger">{categoryError}</p>
+          )}
+        </div>
 
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <label htmlFor="todo-due" className="block text-sm font-medium text-text-primary">마감일</label>
             <input
@@ -133,6 +145,20 @@ const TodoFormModal = ({ isOpen, onClose, editTodo, categories }: TodoFormModalP
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="todo-time" className="block text-sm font-medium text-text-primary">
+              시간 <span className="text-text-muted font-normal text-xs">(선택)</span>
+            </label>
+            <input
+              id="todo-time"
+              type="time"
+              value={dueTime}
+              onChange={(e) => setDueTime(e.target.value)}
+              disabled={!dueDate}
+              className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             />
           </div>
         </div>

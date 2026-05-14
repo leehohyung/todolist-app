@@ -12,10 +12,10 @@ const AppLayout = ({ title, children, action }: AppLayoutProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-bg-secondary">
+    <div className="flex min-h-screen bg-bg-secondary">
       <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 
-      <div className="md:pl-[240px]">
+      <div className="flex-1 min-w-0">
         <MobileTopBar title={title} onMenuClick={() => setMobileOpen(true)} />
 
         <main className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-8">

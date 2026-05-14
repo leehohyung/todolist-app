@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useLogout } from '../../hooks/auth/useLogout';
 
@@ -56,7 +56,6 @@ interface SidebarProps {
 const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
   const { userName } = useAuth();
   const { logout } = useLogout();
-  const navigate = useNavigate();
 
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
@@ -68,7 +67,6 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
   const handleLogout = () => {
     onClose?.();
     logout();
-    navigate('/login');
   };
 
   return (
@@ -116,7 +114,8 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
 const Sidebar = ({ mobileOpen = false, onMobileClose }: SidebarProps) => {
   return (
     <>
-      <aside className="hidden md:flex md:w-[240px] md:flex-col md:fixed md:inset-y-0 md:left-0 bg-sidebar-bg border-r border-border z-30">
+      <div className="hidden md:block w-60 shrink-0" aria-hidden="true" />
+      <aside className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 md:left-0 bg-sidebar-bg border-r border-border z-30">
         <SidebarContent />
       </aside>
 

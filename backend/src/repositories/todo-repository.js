@@ -42,11 +42,11 @@ const todoRepository = {
       params.push(filters.categoryId);
     }
     if (filters.startDate) {
-      conditions.push(`due_date >= $${idx++}`);
+      conditions.push(`DATE(due_date) >= $${idx++}::DATE`);
       params.push(filters.startDate);
     }
     if (filters.endDate) {
-      conditions.push(`due_date <= $${idx++}`);
+      conditions.push(`DATE(due_date) <= $${idx++}::DATE`);
       params.push(filters.endDate);
     }
     if (filters.isCompleted !== undefined) {
@@ -55,7 +55,7 @@ const todoRepository = {
     }
 
     const { rows } = await pool.query(
-      `SELECT * FROM todos WHERE ${conditions.join(' AND ')} ORDER BY created_at DESC`,
+      `SELECT * FROM todos WHERE ${conditions.join(' AND ')} ORDER BY COALESCE(due_date, 'infinity'::TIMESTAMP) ASC, created_at DESC`,
       params,
     );
     return rows.map(mapRow);

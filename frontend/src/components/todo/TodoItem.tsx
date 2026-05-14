@@ -1,5 +1,5 @@
 import type { Todo } from '../../types';
-import { formatDate } from '../../utils/date-utils';
+import { formatDateTimeDisplay } from '../../utils/date-utils';
 
 const CAT_COLORS = [
   { bg: '#BFE1FF', text: '#1D4ED8' },
@@ -23,7 +23,7 @@ interface TodoItemProps {
 
 const TodoItem = ({ todo, categoryName, categoryIndex, onToggle, onEdit, onDelete }: TodoItemProps) => {
   const color = CAT_COLORS[categoryIndex % CAT_COLORS.length];
-  const formattedDue = formatDate(todo.dueDate);
+  const formattedDue = formatDateTimeDisplay(todo.dueDate);
 
   return (
     <div

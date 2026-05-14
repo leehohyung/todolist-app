@@ -13,6 +13,7 @@ import Loading from '../components/common/Loading';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import TodoList from '../components/todo/TodoList';
 import TodoFormModal from '../components/todo/TodoFormModal';
+import CalendarView from '../components/todo/CalendarView';
 import FilterBar from '../components/filter/FilterBar';
 import Button from '../components/common/Button';
 
@@ -34,11 +35,17 @@ const TodoListPage = () => {
     (s) => !!s.categoryId || !!s.dueDate || s.completionStatus !== 'all',
   );
 
+  const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [formOpen, setFormOpen] = useState(false);
   const [editTodo, setEditTodo] = useState<Todo | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<Todo | null>(null);
+  const [selectedDateForCreate, setSelectedDateForCreate] = useState<string | undefined>();
 
-  const openCreate = () => { setEditTodo(undefined); setFormOpen(true); };
+  const openCreate = (date?: string) => {
+    if (date) setSelectedDateForCreate(date);
+    setEditTodo(undefined);
+    setFormOpen(true);
+  };
 
   const totalCount = todos?.length ?? 0;
   const completedCount = todos?.filter((t) => t.isCompleted).length ?? 0;
@@ -48,35 +55,36 @@ const TodoListPage = () => {
     <AppLayout
       title={`안녕하세요, ${userName ?? ''}님 👋`}
       action={
-        <Button variant="primary" size="md" onClick={openCreate} className="gap-1.5">
-          <PlusIcon />
-          새 할일
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-lg border border-border overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setView('calendar')}
+              title="캘린더 보기"
+              className={`p-2 transition-colors ${view === 'calendar' ? 'bg-accent text-white' : 'bg-white text-text-muted hover:bg-bg-secondary'}`}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setView('list')}
+              title="목록 보기"
+              className={`p-2 transition-colors ${view === 'list' ? 'bg-accent text-white' : 'bg-white text-text-muted hover:bg-bg-secondary'}`}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <Button variant="primary" size="md" onClick={() => openCreate()} className="gap-1.5">
+            <PlusIcon />
+            새 할일
+          </Button>
+        </div>
       }
     >
-      {!isLoading && !isError && totalCount > 0 && (
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-white rounded-xl border border-border p-4">
-            <p className="text-xs text-text-muted font-medium uppercase tracking-wide">전체</p>
-            <p className="text-2xl font-bold text-text-primary mt-1">{totalCount}</p>
-          </div>
-          <div className="bg-white rounded-xl border border-border p-4">
-            <p className="text-xs text-text-muted font-medium uppercase tracking-wide">완료</p>
-            <p className="text-2xl font-bold text-success mt-1">{completedCount}</p>
-          </div>
-          <div className="bg-white rounded-xl border border-border p-4">
-            <p className="text-xs text-text-muted font-medium uppercase tracking-wide">기한 초과</p>
-            <p className={`text-2xl font-bold mt-1 ${overdueCount > 0 ? 'text-danger' : 'text-text-muted'}`}>
-              {overdueCount}
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div className="mb-4">
-        <FilterBar />
-      </div>
-
       {isLoading && <Loading />}
 
       {isError && (
@@ -85,22 +93,58 @@ const TodoListPage = () => {
         </div>
       )}
 
-      {!isLoading && !isError && (
-        <TodoList
+      {!isLoading && !isError && view === 'calendar' && (
+        <CalendarView
           todos={todos ?? []}
           categories={categories}
-          onToggle={(todoId) => completeTodo.mutate(todoId)}
+          onCreateWithDate={(date) => { setSelectedDateForCreate(date); setEditTodo(undefined); setFormOpen(true); }}
           onEdit={(todo) => { setEditTodo(todo); setFormOpen(true); }}
           onDelete={setDeleteTarget}
-          isFiltered={hasFilter}
-          onResetFilter={resetFilters}
-          emptyAction={{ label: '+ 첫 번째 할일 추가하기', onClick: openCreate }}
+          onToggle={(todoId) => completeTodo.mutate(todoId)}
         />
+      )}
+
+      {!isLoading && !isError && view === 'list' && (
+        <>
+          {totalCount > 0 && (
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="bg-white rounded-xl border border-border p-4">
+                <p className="text-xs text-text-muted font-medium uppercase tracking-wide">전체</p>
+                <p className="text-2xl font-bold text-text-primary mt-1">{totalCount}</p>
+              </div>
+              <div className="bg-white rounded-xl border border-border p-4">
+                <p className="text-xs text-text-muted font-medium uppercase tracking-wide">완료</p>
+                <p className="text-2xl font-bold text-success mt-1">{completedCount}</p>
+              </div>
+              <div className="bg-white rounded-xl border border-border p-4">
+                <p className="text-xs text-text-muted font-medium uppercase tracking-wide">기한 초과</p>
+                <p className={`text-2xl font-bold mt-1 ${overdueCount > 0 ? 'text-danger' : 'text-text-muted'}`}>
+                  {overdueCount}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="mb-4">
+            <FilterBar />
+          </div>
+
+          <TodoList
+            todos={todos ?? []}
+            categories={categories}
+            onToggle={(todoId) => completeTodo.mutate(todoId)}
+            onEdit={(todo) => { setEditTodo(todo); setFormOpen(true); }}
+            onDelete={setDeleteTarget}
+            isFiltered={hasFilter}
+            onResetFilter={resetFilters}
+            emptyAction={{ label: '+ 첫 번째 할일 추가하기', onClick: openCreate }}
+          />
+        </>
       )}
 
       <button
         type="button"
-        onClick={openCreate}
+        onClick={() => openCreate()}
         aria-label="새 할일 추가"
         className="md:hidden fixed bottom-6 right-5 z-30 h-13 w-13 rounded-full bg-accent text-white shadow-lg hover:bg-accent-hover transition-all active:scale-95 flex items-center justify-center"
         style={{ height: '52px', width: '52px' }}
@@ -108,7 +152,13 @@ const TodoListPage = () => {
         <PlusIcon />
       </button>
 
-      <TodoFormModal isOpen={formOpen} onClose={() => { setFormOpen(false); setEditTodo(undefined); }} editTodo={editTodo} categories={categories} />
+      <TodoFormModal
+        isOpen={formOpen}
+        onClose={() => { setFormOpen(false); setEditTodo(undefined); setSelectedDateForCreate(undefined); }}
+        editTodo={editTodo}
+        categories={categories}
+        defaultDueDate={selectedDateForCreate}
+      />
 
       {deleteTarget && (
         <ConfirmDialog

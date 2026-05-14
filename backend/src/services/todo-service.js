@@ -4,19 +4,32 @@ const { AppError } = require('../types/errors');
 const { ErrorCode } = require('../constants/error-codes');
 
 // BR-12: dueDate < today AND isCompleted=false → overdue (계산 속성, DB 저장 안 함)
-// UTC 날짜 문자열 비교로 타임존 오차 방지
+// TIMESTAMP 저장 방식: UTC 기준으로 해석
+// - hours=0, mins=0 (날짜만 저장된 경우): 날짜 문자열 비교로 이전 동작 유지
+// - 시간이 설정된 경우: 전체 datetime 비교
 function isOverdue(todo) {
   if (!todo.dueDate || todo.isCompleted) return false;
-  const dueDate = new Date(todo.dueDate).toISOString().slice(0, 10);
-  const today = new Date().toISOString().slice(0, 10);
-  return dueDate < today;
+  const dueDate = new Date(todo.dueDate);
+  const hours = dueDate.getUTCHours();
+  const mins = dueDate.getUTCMinutes();
+  if (hours === 0 && mins === 0) {
+    return dueDate.toISOString().slice(0, 10) < new Date().toISOString().slice(0, 10);
+  }
+  return dueDate < new Date();
 }
 
 const todoService = {
   async getTodos(userId, filters) {
     console.log(`[TODO] 목록 조회 - userId: ${userId}, filters: ${JSON.stringify(filters)}`);
     // BR-13: 카테고리/날짜/완료여부 필터
-    const todos = await todoRepository.findAllByUserId(userId, filters);
+    // dueDate 단일 날짜 필터를 startDate/endDate 범위로 변환 (TIMESTAMP 컬럼 DATE 비교용)
+    const repoFilters = { ...filters };
+    if (filters.dueDate) {
+      repoFilters.startDate = filters.dueDate;          // "YYYY-MM-DD"
+      repoFilters.endDate = filters.dueDate;
+      delete repoFilters.dueDate;
+    }
+    const todos = await todoRepository.findAllByUserId(userId, repoFilters);
     console.log(`[TODO] 목록 조회 완료 - userId: ${userId}, count: ${todos.length}`);
     return todos.map((todo) => ({ ...todo, overdue: isOverdue(todo) }));
   },
