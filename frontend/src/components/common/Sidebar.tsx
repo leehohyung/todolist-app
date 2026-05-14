@@ -116,7 +116,7 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
 const Sidebar = ({ mobileOpen = false, onMobileClose }: SidebarProps) => {
   return (
     <>
-      <aside className="hidden md:flex md:w-[240px] md:flex-col md:fixed md:inset-y-0 bg-sidebar-bg border-r border-border z-30">
+      <aside className="hidden md:flex md:w-[240px] md:flex-col md:fixed md:inset-y-0 md:left-0 bg-sidebar-bg border-r border-border z-30">
         <SidebarContent />
       </aside>
 
