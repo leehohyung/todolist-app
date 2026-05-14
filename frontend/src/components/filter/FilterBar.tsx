@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { useFilterStore } from '../../stores/filter-store';
 import { useCategories } from '../../hooks/category/useCategories';
 import type { CompletionStatus } from '../../types';
-import Button from '../common/Button';
 
-const COMPLETION_OPTIONS: { value: CompletionStatus; label: string }[] = [
+const STATUS_TABS: { value: CompletionStatus; label: string }[] = [
   { value: 'all', label: '전체' },
   { value: 'incomplete', label: '미완료' },
   { value: 'completed', label: '완료됨' },
@@ -13,108 +12,95 @@ const COMPLETION_OPTIONS: { value: CompletionStatus; label: string }[] = [
 const FilterBar = () => {
   const { data: categories = [] } = useCategories();
   const filterStore = useFilterStore();
+  const [showMore, setShowMore] = useState(false);
 
-  const [draft, setDraft] = useState({
-    categoryId: filterStore.categoryId,
-    dueDate: filterStore.dueDate,
-    completionStatus: filterStore.completionStatus,
-  });
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleApply = () => {
-    filterStore.setFilter(draft);
-    setIsOpen(false);
-  };
-
-  const handleReset = () => {
-    const reset = { categoryId: '', dueDate: '', completionStatus: 'all' as CompletionStatus };
-    setDraft(reset);
-    filterStore.resetFilters();
-    setIsOpen(false);
-  };
-
-  const filterContent = (
-    <div className="flex flex-col lg:flex-row lg:items-end gap-3 lg:gap-4">
-      <div className="flex flex-col gap-1 lg:flex-1">
-        <label htmlFor="filter-category" className="text-xs font-medium text-text-secondary">카테고리</label>
-        <select
-          id="filter-category"
-          value={draft.categoryId}
-          onChange={(e) => setDraft((d) => ({ ...d, categoryId: e.target.value }))}
-          className="w-full border border-border rounded-md px-3 py-2 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-        >
-          <option value="">전체</option>
-          {categories.map((c) => (
-            <option key={c.categoryId} value={c.categoryId}>{c.name}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="flex flex-col gap-1 lg:flex-1">
-        <label htmlFor="filter-due" className="text-xs font-medium text-text-secondary">마감일</label>
-        <input
-          id="filter-due"
-          type="date"
-          value={draft.dueDate}
-          onChange={(e) => setDraft((d) => ({ ...d, dueDate: e.target.value }))}
-          className="w-full border border-border rounded-md px-3 py-2 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-        />
-      </div>
-
-      <fieldset className="flex flex-col gap-1 lg:flex-1">
-        <legend className="text-xs font-medium text-text-secondary mb-1">완료 여부</legend>
-        <div className="flex gap-4">
-          {COMPLETION_OPTIONS.map((opt) => (
-            <label key={opt.value} className="flex items-center gap-1.5 text-sm text-text-primary cursor-pointer">
-              <input
-                type="radio"
-                name="completion-status"
-                value={opt.value}
-                checked={draft.completionStatus === opt.value}
-                onChange={() => setDraft((d) => ({ ...d, completionStatus: opt.value }))}
-                className="accent-accent"
-              />
-              {opt.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <div className="flex gap-2 lg:shrink-0">
-        <Button variant="primary" onClick={handleApply} className="flex-1 lg:flex-none">
-          적용
-        </Button>
-        <Button variant="ghost" onClick={handleReset} className="flex-1 lg:flex-none">
-          초기화
-        </Button>
-      </div>
-    </div>
-  );
+  const hasDateFilter = !!filterStore.dueDate;
+  const hasCatFilter = !!filterStore.categoryId;
+  const hasAnyFilter = hasDateFilter || hasCatFilter || filterStore.completionStatus !== 'all';
 
   return (
-    <div className="bg-white border border-border rounded-lg shadow-card p-4">
-      <div className="lg:hidden">
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 overflow-x-auto pb-0.5 hide-scrollbar">
+        {STATUS_TABS.map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => filterStore.setFilter({ completionStatus: tab.value })}
+            className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-150 ${
+              filterStore.completionStatus === tab.value
+                ? 'bg-accent text-white shadow-xs'
+                : 'bg-white border border-border text-text-secondary hover:border-border-strong hover:text-text-primary'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+
+        <div className="h-5 w-px bg-border mx-1 shrink-0" aria-hidden="true" />
+
         <button
           type="button"
-          onClick={() => setIsOpen((v) => !v)}
-          aria-expanded={isOpen}
-          className="flex w-full items-center justify-between text-sm font-medium text-text-primary"
+          onClick={() => setShowMore((v) => !v)}
+          className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 ${
+            hasDateFilter || hasCatFilter
+              ? 'bg-accent-light border-accent/30 text-accent'
+              : 'bg-white border-border text-text-secondary hover:border-border-strong hover:text-text-primary'
+          }`}
+          aria-expanded={showMore}
         >
-          <span>필터</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          <svg viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
+            <path d="M6 10.5a.5.5 0 01.5-.5h3a.5.5 0 010 1h-3a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm-2-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5z"/>
           </svg>
+          필터
+          {(hasDateFilter || hasCatFilter) && (
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-accent text-white text-[10px] font-bold">
+              {(hasDateFilter ? 1 : 0) + (hasCatFilter ? 1 : 0)}
+            </span>
+          )}
         </button>
-        {isOpen && <div className="mt-3">{filterContent}</div>}
+
+        {hasAnyFilter && (
+          <button
+            type="button"
+            onClick={() => filterStore.resetFilters()}
+            className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-text-muted hover:text-danger hover:bg-danger-light transition-colors"
+          >
+            초기화
+          </button>
+        )}
       </div>
 
-      <div className="hidden lg:block">{filterContent}</div>
+      {showMore && (
+        <div className="bg-white border border-border rounded-xl p-4 space-y-4 animate-slide-up shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="filter-category" className="block text-xs font-medium text-text-secondary mb-1.5">카테고리</label>
+              <select
+                id="filter-category"
+                value={filterStore.categoryId}
+                onChange={(e) => filterStore.setFilter({ categoryId: e.target.value })}
+                className="w-full border border-border rounded-lg px-3 py-2 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+              >
+                <option value="">전체 카테고리</option>
+                {categories.map((c) => (
+                  <option key={c.categoryId} value={c.categoryId}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="filter-due" className="block text-xs font-medium text-text-secondary mb-1.5">마감일</label>
+              <input
+                id="filter-due"
+                type="date"
+                value={filterStore.dueDate}
+                onChange={(e) => filterStore.setFilter({ dueDate: e.target.value })}
+                className="w-full border border-border rounded-lg px-3 py-2 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

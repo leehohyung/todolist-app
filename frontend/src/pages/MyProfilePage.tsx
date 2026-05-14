@@ -5,7 +5,7 @@ import { useUiStore } from '../stores/ui-store';
 import { useAuthStore } from '../stores/auth-store';
 import { validateName, validatePassword, validatePasswordMatch } from '../utils/validate';
 import { AUTH } from '../constants/messages';
-import Header from '../components/common/Header';
+import AppLayout from '../components/common/AppLayout';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 
@@ -60,9 +60,7 @@ const MyProfilePage = () => {
       {
         onSuccess: () => {
           addToast('success', AUTH.PROFILE_UPDATE_SUCCESS);
-          setCurrentPw('');
-          setNewPw('');
-          setConfirmPw('');
+          setCurrentPw(''); setNewPw(''); setConfirmPw('');
           setPwErrors({ current: '', newPw: '', confirm: '' });
         },
         onError: () => addToast('error', AUTH.WRONG_CURRENT_PASSWORD),
@@ -71,22 +69,27 @@ const MyProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bg-secondary">
-      <Header />
+    <AppLayout title="내 정보">
+      <div className="space-y-5">
+        <div className="flex items-center gap-4 bg-white rounded-xl border border-border p-5">
+          <div className="h-14 w-14 rounded-full bg-accent-light flex items-center justify-center text-accent text-xl font-bold shrink-0">
+            {userName?.charAt(0) ?? '?'}
+          </div>
+          <div>
+            <p className="text-base font-semibold text-text-primary">{userName}</p>
+            <p className="text-sm text-text-muted mt-0.5">계정 정보를 관리하세요</p>
+          </div>
+        </div>
 
-      <main className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-6">
-        <h1 className="text-xl font-bold text-text-primary">마이페이지</h1>
-
-        <section className="bg-white rounded-lg shadow-card border border-border p-6">
-          <h2 className="text-base font-semibold text-text-primary mb-4">이름 변경</h2>
-          <form onSubmit={handleNameSubmit} noValidate className="flex flex-col gap-4">
-            <Input
-              label="현재 이름"
-              value={userName ?? ''}
-              readOnly
-              id="current-name"
-              className="bg-bg-secondary cursor-not-allowed"
-            />
+        <section className="bg-white rounded-xl border border-border p-5">
+          <h2 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-text-muted" aria-hidden="true">
+              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+            </svg>
+            이름 변경
+          </h2>
+          <form onSubmit={handleNameSubmit} noValidate className="space-y-4">
+            <Input label="현재 이름" value={userName ?? ''} readOnly id="current-name" className="bg-bg-secondary cursor-not-allowed text-text-secondary" />
             <Input
               label="새 이름"
               id="new-name"
@@ -97,58 +100,29 @@ const MyProfilePage = () => {
               placeholder="변경할 이름을 입력하세요"
             />
             <div className="flex justify-end">
-              <Button type="submit" variant="primary" isLoading={updateProfile.isPending}>
-                저장
-              </Button>
+              <Button type="submit" variant="primary" isLoading={updateProfile.isPending} size="sm">저장</Button>
             </div>
           </form>
         </section>
 
-        <section className="bg-white rounded-lg shadow-card border border-border p-6">
-          <h2 className="text-base font-semibold text-text-primary mb-4">비밀번호 변경</h2>
-          <form onSubmit={handlePasswordSubmit} noValidate className="flex flex-col gap-4">
-            <Input
-              label="현재 비밀번호"
-              type="password"
-              id="current-pw"
-              value={currentPw}
-              onChange={(e) => { setCurrentPw(e.target.value); if (pwErrors.current) setPwErrors((p) => ({ ...p, current: '' })); }}
-              error={pwErrors.current}
-              required
-              placeholder="현재 비밀번호를 입력하세요"
-              autoComplete="current-password"
-            />
-            <Input
-              label="새 비밀번호"
-              type="password"
-              id="new-pw"
-              value={newPw}
-              onChange={(e) => { setNewPw(e.target.value); if (pwErrors.newPw) setPwErrors((p) => ({ ...p, newPw: '' })); }}
-              error={pwErrors.newPw}
-              required
-              placeholder="8자 이상 입력하세요"
-              autoComplete="new-password"
-            />
-            <Input
-              label="비밀번호 확인"
-              type="password"
-              id="confirm-pw"
-              value={confirmPw}
-              onChange={(e) => { setConfirmPw(e.target.value); if (pwErrors.confirm) setPwErrors((p) => ({ ...p, confirm: '' })); }}
-              error={pwErrors.confirm}
-              required
-              placeholder="새 비밀번호를 다시 입력하세요"
-              autoComplete="new-password"
-            />
+        <section className="bg-white rounded-xl border border-border p-5">
+          <h2 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-text-muted" aria-hidden="true">
+              <path fillRule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clipRule="evenodd" />
+            </svg>
+            비밀번호 변경
+          </h2>
+          <form onSubmit={handlePasswordSubmit} noValidate className="space-y-4">
+            <Input label="현재 비밀번호" type="password" id="current-pw" value={currentPw} onChange={(e) => { setCurrentPw(e.target.value); if (pwErrors.current) setPwErrors((p) => ({ ...p, current: '' })); }} error={pwErrors.current} required placeholder="현재 비밀번호" autoComplete="current-password" />
+            <Input label="새 비밀번호" type="password" id="new-pw" value={newPw} onChange={(e) => { setNewPw(e.target.value); if (pwErrors.newPw) setPwErrors((p) => ({ ...p, newPw: '' })); }} error={pwErrors.newPw} required placeholder="8자 이상" hint="영문, 숫자 조합 8자 이상" autoComplete="new-password" />
+            <Input label="비밀번호 확인" type="password" id="confirm-pw" value={confirmPw} onChange={(e) => { setConfirmPw(e.target.value); if (pwErrors.confirm) setPwErrors((p) => ({ ...p, confirm: '' })); }} error={pwErrors.confirm} required placeholder="새 비밀번호 재입력" autoComplete="new-password" />
             <div className="flex justify-end">
-              <Button type="submit" variant="primary" isLoading={updateProfile.isPending}>
-                저장
-              </Button>
+              <Button type="submit" variant="primary" isLoading={updateProfile.isPending} size="sm">저장</Button>
             </div>
           </form>
         </section>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

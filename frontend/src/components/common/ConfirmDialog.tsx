@@ -6,6 +6,7 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   confirmLabel?: string;
+  confirmVariant?: 'primary' | 'danger';
 }
 
 const ConfirmDialog = ({
@@ -14,34 +15,17 @@ const ConfirmDialog = ({
   onConfirm,
   onCancel,
   confirmLabel = '삭제',
+  confirmVariant = 'danger',
 }: ConfirmDialogProps) => {
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      role="alertdialog"
-      aria-modal="true"
-      aria-labelledby="confirm-title"
-      aria-describedby="confirm-message"
-    >
-      <div
-        className="absolute inset-0 bg-black/50 animate-fade-in"
-        onClick={onCancel}
-        aria-hidden="true"
-      />
-      <div className="relative z-10 w-full max-w-sm bg-white rounded-lg shadow-lg animate-slide-up p-6">
-        <h2 id="confirm-title" className="text-lg font-semibold text-text-primary mb-2">
-          {title}
-        </h2>
-        <p id="confirm-message" className="text-sm text-text-secondary mb-6">
-          {message}
-        </p>
-        <div className="flex justify-end gap-3">
-          <Button variant="ghost" onClick={onCancel}>
-            취소
-          </Button>
-          <Button variant="danger" onClick={onConfirm}>
-            {confirmLabel}
-          </Button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" aria-modal="true" role="alertdialog" aria-labelledby="confirm-title">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in" onClick={onCancel} aria-hidden="true" />
+      <div className="relative z-10 w-full max-w-sm bg-white rounded-xl shadow-xl animate-scale-in p-6">
+        <h2 id="confirm-title" className="text-base font-semibold text-text-primary mb-2">{title}</h2>
+        <p className="text-sm text-text-secondary mb-5">{message}</p>
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={onCancel}>취소</Button>
+          <Button variant={confirmVariant} onClick={onConfirm}>{confirmLabel}</Button>
         </div>
       </div>
     </div>

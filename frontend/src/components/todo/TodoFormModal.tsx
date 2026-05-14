@@ -65,27 +65,21 @@ const TodoFormModal = ({ isOpen, onClose, editTodo, categories }: TodoFormModalP
       updateTodo.mutate(
         { todoId: editTodo.todoId, data: payload },
         {
-          onSuccess: () => {
-            addToast('success', TODO.UPDATE_SUCCESS);
-            onClose();
-          },
+          onSuccess: () => { addToast('success', TODO.UPDATE_SUCCESS); onClose(); },
           onError: () => addToast('error', '수정 중 오류가 발생했습니다.'),
         },
       );
     } else {
       createTodo.mutate(payload, {
-        onSuccess: () => {
-          addToast('success', TODO.CREATE_SUCCESS);
-          onClose();
-        },
+        onSuccess: () => { addToast('success', TODO.CREATE_SUCCESS); onClose(); },
         onError: () => addToast('error', '추가 중 오류가 발생했습니다.'),
       });
     }
   };
 
   return (
-    <Modal isOpen={isOpen} title={isEdit ? '할일 수정' : '할일 추가'} onClose={onClose}>
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <Modal isOpen={isOpen} title={isEdit ? '할일 수정' : '새 할일 추가'} onClose={onClose}>
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <Input
           label="제목"
           id="todo-title"
@@ -93,65 +87,60 @@ const TodoFormModal = ({ isOpen, onClose, editTodo, categories }: TodoFormModalP
           onChange={(e) => setTitle(e.target.value)}
           error={titleError}
           required
-          placeholder="할일 제목을 입력하세요"
+          placeholder="무엇을 해야 하나요?"
+          autoFocus
         />
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="todo-desc" className="text-sm font-medium text-text-primary">
-            설명
-          </label>
+        <div className="space-y-1.5">
+          <label htmlFor="todo-desc" className="block text-sm font-medium text-text-primary">메모</label>
           <textarea
             id="todo-desc"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            placeholder="상세 내용을 입력하세요 (선택)"
-            className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-shadow resize-none"
+            placeholder="추가 메모를 입력하세요 (선택)"
+            className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white placeholder:text-text-placeholder focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors resize-none"
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="todo-category" className="text-sm font-medium text-text-primary">
-            카테고리<span className="ml-1 text-danger" aria-hidden="true">*</span>
-          </label>
-          <select
-            id="todo-category"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            aria-invalid={!!categoryError}
-            className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-          >
-            <option value="">카테고리 선택</option>
-            {categories.map((c) => (
-              <option key={c.categoryId} value={c.categoryId}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-          {categoryError && (
-            <p role="alert" className="text-xs text-danger">{categoryError}</p>
-          )}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label htmlFor="todo-category" className="block text-sm font-medium text-text-primary">
+              카테고리<span className="ml-1 text-danger" aria-hidden="true">*</span>
+            </label>
+            <select
+              id="todo-category"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              aria-invalid={!!categoryError}
+              className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+            >
+              <option value="">선택</option>
+              {categories.map((c) => (
+                <option key={c.categoryId} value={c.categoryId}>{c.name}</option>
+              ))}
+            </select>
+            {categoryError && (
+              <p role="alert" className="text-xs text-danger">{categoryError}</p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="todo-due" className="block text-sm font-medium text-text-primary">마감일</label>
+            <input
+              id="todo-due"
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="todo-due" className="text-sm font-medium text-text-primary">
-            마감일
-          </label>
-          <input
-            id="todo-due"
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className="w-full border border-border rounded-md px-3 py-2.5 text-sm text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-          />
-        </div>
-
-        <div className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="ghost" onClick={onClose}>
-            취소
-          </Button>
+        <div className="flex justify-end gap-2 pt-1">
+          <Button type="button" variant="ghost" onClick={onClose}>취소</Button>
           <Button type="submit" variant="primary" isLoading={isPending}>
-            {isEdit ? '수정' : '추가'}
+            {isEdit ? '수정 완료' : '추가'}
           </Button>
         </div>
       </form>

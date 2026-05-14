@@ -36,14 +36,14 @@ const LoginForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} noValidate className="space-y-4">
       <Input
         label="이메일"
         type="email"
         id="login-email"
         placeholder="example@email.com"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => ({ ...p, email: '' })); }}
         error={errors.email}
         required
         autoComplete="email"
@@ -54,17 +54,12 @@ const LoginForm = () => {
         id="login-password"
         placeholder="비밀번호를 입력하세요"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => { setPassword(e.target.value); if (errors.password) setErrors((p) => ({ ...p, password: '' })); }}
         error={errors.password}
         required
         autoComplete="current-password"
       />
-      <Button
-        type="submit"
-        variant="primary"
-        isLoading={login.isPending}
-        className="w-full mt-2"
-      >
+      <Button type="submit" variant="primary" size="lg" isLoading={login.isPending} className="w-full mt-1">
         로그인
       </Button>
     </form>

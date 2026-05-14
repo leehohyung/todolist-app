@@ -1,24 +1,17 @@
-const SkeletonCard = () => (
-  <div className="bg-white rounded-lg shadow-card border border-border p-4 animate-pulse">
-    <div className="flex items-start gap-3">
-      <div className="mt-1 h-5 w-5 rounded bg-gray-200 shrink-0" />
-      <div className="flex-1 space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-3/4" />
-        <div className="h-3 bg-gray-200 rounded w-1/2" />
-        <div className="flex gap-2 mt-2">
-          <div className="h-5 bg-gray-200 rounded-full w-16" />
-          <div className="h-5 bg-gray-200 rounded w-20" />
-        </div>
-      </div>
+const SkeletonRow = () => (
+  <div className="flex items-center gap-3 px-4 py-3 animate-pulse">
+    <div className="h-4 w-4 rounded bg-bg-tertiary shrink-0" />
+    <div className="flex-1 space-y-1.5">
+      <div className="h-3.5 bg-bg-tertiary rounded w-2/3" />
+      <div className="h-3 bg-bg-tertiary rounded w-1/3" />
     </div>
+    <div className="h-5 bg-bg-tertiary rounded-full w-14 shrink-0" />
   </div>
 );
 
 const Loading = () => (
-  <div className="flex flex-col gap-3" aria-label="로딩 중">
-    <SkeletonCard />
-    <SkeletonCard />
-    <SkeletonCard />
+  <div className="divide-y divide-border" aria-label="로딩 중">
+    {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
   </div>
 );
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useCategories } from '../hooks/category/useCategories';
-import Header from '../components/common/Header';
+import AppLayout from '../components/common/AppLayout';
 import Modal from '../components/common/Modal';
 import CategoryMenu from '../components/category/CategoryMenu';
 import CategoryForm from '../components/category/CategoryForm';
@@ -11,28 +11,33 @@ const CategoryPage = () => {
   const [formOpen, setFormOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-bg-secondary">
-      <Header />
-
-      <main className="max-w-2xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold text-text-primary">카테고리 관리</h1>
-          <Button variant="primary" onClick={() => setFormOpen(true)}>
-            + 카테고리 추가
-          </Button>
+    <AppLayout
+      title="카테고리"
+      action={
+        <Button variant="primary" size="md" onClick={() => setFormOpen(true)}>
+          + 새 카테고리
+        </Button>
+      }
+    >
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-16 bg-white rounded-xl border border-border animate-pulse" />
+          ))}
         </div>
-
-        {isLoading ? (
-          <div className="text-center py-12 text-text-muted text-sm">로딩 중...</div>
-        ) : (
+      ) : (
+        <>
+          <p className="text-sm text-text-secondary mb-4">
+            총 <span className="font-semibold text-text-primary">{categories.length}</span>개의 카테고리
+          </p>
           <CategoryMenu categories={categories} />
-        )}
-      </main>
+        </>
+      )}
 
-      <Modal isOpen={formOpen} title="카테고리 추가" onClose={() => setFormOpen(false)}>
+      <Modal isOpen={formOpen} title="새 카테고리 추가" onClose={() => setFormOpen(false)} size="sm">
         <CategoryForm onClose={() => setFormOpen(false)} />
       </Modal>
-    </div>
+    </AppLayout>
   );
 };
 
