@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import Toast from './components/common/Toast';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import TodoListPage from './pages/TodoListPage';
@@ -10,6 +11,7 @@ import NotFoundPage from './pages/NotFoundPage';
 function App() {
   return (
     <BrowserRouter>
+      <Toast />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
