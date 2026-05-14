@@ -36,7 +36,7 @@ const authService = {
     const accessToken = generateAccessToken(user.userId);
     const refreshToken = generateRefreshToken(user.userId);
     console.log(`[AUTH] 로그인 성공 - userId: ${user.userId}`);
-    return { accessToken, refreshToken, userId: user.userId, expiresIn: 3600 };
+    return { accessToken, refreshToken, userId: user.userId, userName: user.name, expiresIn: 3600 };
   },
 
   async refreshTokens(refreshToken) {

@@ -30,7 +30,9 @@ describe('useLogin', () => {
     vi.mocked(authApi.login).mockResolvedValue({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
-      user: { userId: 'user-1', email: 'test@test.com', name: '홍길동' },
+      userId: 'user-1',
+      userName: '홍길동',
+      expiresIn: 3600,
     });
 
     const { result } = renderHook(() => useLogin(), { wrapper: createWrapper() });

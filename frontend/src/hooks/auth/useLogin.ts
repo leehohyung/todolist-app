@@ -11,8 +11,8 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: (data: LoginRequest) => login(data),
     onSuccess: (response) => {
-      const { accessToken, refreshToken, user } = response;
-      setTokens(accessToken, refreshToken, user.userId, user.name);
+      const { accessToken, refreshToken, userId, userName } = response;
+      setTokens(accessToken, refreshToken, userId, userName);
       navigate('/todos');
     },
   });
