@@ -3,17 +3,18 @@ const { categoryRepository } = require('../repositories/category-repository');
 const { AppError } = require('../types/errors');
 const { ErrorCode } = require('../constants/error-codes');
 
-// BR-12: dueDate < today AND isCompleted=false → overdue (계산 속성, DB 저장 안 함)
-// TIMESTAMP 저장 방식: UTC 기준으로 해석
-// - hours=0, mins=0 (날짜만 저장된 경우): 날짜 문자열 비교로 이전 동작 유지
-// - 시간이 설정된 경우: 전체 datetime 비교
+function pad(n) { return String(n).padStart(2, '0'); }
+function localDateStr(d) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 function isOverdue(todo) {
   if (!todo.dueDate || todo.isCompleted) return false;
   const dueDate = new Date(todo.dueDate);
-  const hours = dueDate.getUTCHours();
-  const mins = dueDate.getUTCMinutes();
+  const hours = dueDate.getHours();
+  const mins = dueDate.getMinutes();
   if (hours === 0 && mins === 0) {
-    return dueDate.toISOString().slice(0, 10) < new Date().toISOString().slice(0, 10);
+    return localDateStr(dueDate) < localDateStr(new Date());
   }
   return dueDate < new Date();
 }

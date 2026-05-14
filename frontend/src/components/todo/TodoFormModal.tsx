@@ -40,13 +40,15 @@ const TodoFormModal = ({ isOpen, onClose, editTodo, categories, defaultDueDate }
       setCategoryError('');
 
       const rawDate = editTodo?.dueDate ?? (defaultDueDate ?? '');
-      const dateOnly = rawDate ? rawDate.slice(0, 10) : '';
-      const timeOnly = rawDate && rawDate.length > 10 ? (() => {
+      let dateOnly = '';
+      let timeOnly = '';
+      if (rawDate) {
         const d = new Date(rawDate);
-        const h = d.getUTCHours();
-        const m = d.getUTCMinutes();
-        return (h !== 0 || m !== 0) ? `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}` : '';
-      })() : '';
+        dateOnly = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const h = d.getHours();
+        const min = d.getMinutes();
+        timeOnly = (h !== 0 || min !== 0) ? `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}` : '';
+      }
       setDueDate(dateOnly);
       setDueTime(timeOnly);
     }

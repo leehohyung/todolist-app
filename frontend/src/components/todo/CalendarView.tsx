@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Todo, Category } from '../../types';
 import TodoItem from './TodoItem';
-import { hasTime, formatTimeShort } from '../../utils/date-utils';
+import { hasTime, formatTimeShort, localDateStr } from '../../utils/date-utils';
 
 const CAT_COLORS = [
   '#BFE1FF', '#B8EDD4', '#FDE68A', '#DDD6FE',
@@ -54,7 +54,7 @@ function getCalendarDays(year: number, month: number): Date[] {
 }
 
 const CalendarView = ({ todos, categories, onCreateWithDate, onEdit, onDelete, onToggle }: CalendarViewProps) => {
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = localDateStr(new Date().toISOString());
   const todayDate = new Date(todayStr + 'T00:00:00');
 
   const [year, setYear] = useState(todayDate.getFullYear());
@@ -65,7 +65,7 @@ const CalendarView = ({ todos, categories, onCreateWithDate, onEdit, onDelete, o
 
   const todosByDate = todos.reduce<Record<string, Todo[]>>((acc, todo) => {
     if (!todo.dueDate) return acc;
-    const key = todo.dueDate.slice(0, 10);
+    const key = localDateStr(todo.dueDate);
     if (!acc[key]) acc[key] = [];
     acc[key].push(todo);
     return acc;
