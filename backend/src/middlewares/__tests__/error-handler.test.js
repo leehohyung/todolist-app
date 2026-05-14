@@ -96,17 +96,27 @@ describe('errorHandler', () => {
     expect(bodyStr).not.toContain('stack');
   });
 
-  it('logs generic errors to console.error', () => {
+  it('logs generic errors to console.error with method and path', () => {
     const err = new Error('some server error');
-    errorHandler(err, {}, makeRes(), jest.fn());
+    const req = { method: 'GET', path: '/api/test' };
+    errorHandler(err, req, makeRes(), jest.fn());
 
-    expect(consoleSpy).toHaveBeenCalledWith('[ERROR]', err.message);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      `[ERROR] 500 INTERNAL - GET /api/test -`,
+      err.message
+    );
   });
 
-  it('does NOT log AppErrors to console.error', () => {
+  it('logs AppErrors to console.warn (not console.error)', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const err = new AppError(ErrorCode.INVALID_INPUT, 400, 'bad input');
-    errorHandler(err, {}, makeRes(), jest.fn());
+    const req = { method: 'POST', path: '/api/test' };
+    errorHandler(err, req, makeRes(), jest.fn());
 
     expect(consoleSpy).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      `[ERROR] 400 INVALID_INPUT - POST /api/test - bad input`
+    );
+    warnSpy.mockRestore();
   });
 });

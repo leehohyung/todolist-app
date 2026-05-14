@@ -4,22 +4,25 @@ const { AppError } = require('../types/errors');
 const { ErrorCode } = require('../constants/error-codes');
 
 // BR-12: dueDate < today AND isCompleted=false → overdue (계산 속성, DB 저장 안 함)
+// UTC 날짜 문자열 비교로 타임존 오차 방지
 function isOverdue(todo) {
   if (!todo.dueDate || todo.isCompleted) return false;
-  const due = new Date(todo.dueDate);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return due < today;
+  const dueDate = new Date(todo.dueDate).toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  return dueDate < today;
 }
 
 const todoService = {
   async getTodos(userId, filters) {
+    console.log(`[TODO] 목록 조회 - userId: ${userId}, filters: ${JSON.stringify(filters)}`);
     // BR-13: 카테고리/날짜/완료여부 필터
     const todos = await todoRepository.findAllByUserId(userId, filters);
+    console.log(`[TODO] 목록 조회 완료 - userId: ${userId}, count: ${todos.length}`);
     return todos.map((todo) => ({ ...todo, overdue: isOverdue(todo) }));
   },
 
   async createTodo(userId, data) {
+    console.log(`[TODO] 생성 시도 - userId: ${userId}, title: ${data.title}`);
     // BR-09: title, categoryId 필수
     if (!data.title || data.title.trim().length === 0) {
       throw new AppError(ErrorCode.INVALID_INPUT, 400, '할일 제목을 입력해주세요.');
@@ -35,13 +38,16 @@ const todoService = {
       throw new AppError(ErrorCode.NOT_FOUND, 404, '카테고리를 찾을 수 없습니다.');
     }
     if (!category.isDefault && category.userId !== userId) {
+      console.warn(`[TODO] 카테고리 권한 없음 - userId: ${userId}, categoryId: ${data.categoryId}`);
       throw new AppError(ErrorCode.FORBIDDEN, 403, '해당 카테고리를 사용할 권한이 없습니다.');
     }
     const todo = await todoRepository.create(userId, { ...data, title: data.title.trim() });
+    console.log(`[TODO] 생성 성공 - todoId: ${todo.todoId}, userId: ${userId}`);
     return { ...todo, overdue: isOverdue(todo) };
   },
 
   async updateTodo(userId, todoId, data) {
+    console.log(`[TODO] 수정 시도 - todoId: ${todoId}, userId: ${userId}`);
     // BR-10: 소유 검증
     const todo = await todoRepository.findByIdAndUserId(todoId, userId);
     if (!todo) {
@@ -53,29 +59,35 @@ const todoService = {
         throw new AppError(ErrorCode.NOT_FOUND, 404, '카테고리를 찾을 수 없습니다.');
       }
       if (!category.isDefault && category.userId !== userId) {
+        console.warn(`[TODO] 수정 카테고리 권한 없음 - userId: ${userId}, categoryId: ${data.categoryId}`);
         throw new AppError(ErrorCode.FORBIDDEN, 403, '해당 카테고리를 사용할 권한이 없습니다.');
       }
     }
     const updated = await todoRepository.update(todoId, data);
+    console.log(`[TODO] 수정 성공 - todoId: ${todoId}`);
     return { ...updated, overdue: isOverdue(updated) };
   },
 
   async deleteTodo(userId, todoId) {
+    console.log(`[TODO] 삭제 시도 - todoId: ${todoId}, userId: ${userId}`);
     // BR-10: 소유 검증
     const todo = await todoRepository.findByIdAndUserId(todoId, userId);
     if (!todo) {
       throw new AppError(ErrorCode.NOT_FOUND, 404, '할일을 찾을 수 없습니다.');
     }
     await todoRepository.delete(todoId);
+    console.log(`[TODO] 삭제 성공 - todoId: ${todoId}`);
   },
 
   async toggleCompletion(userId, todoId) {
+    console.log(`[TODO] 완료 토글 시도 - todoId: ${todoId}, userId: ${userId}`);
     // BR-11: isCompleted 토글, completedAt 자동 처리
     const todo = await todoRepository.findByIdAndUserId(todoId, userId);
     if (!todo) {
       throw new AppError(ErrorCode.NOT_FOUND, 404, '할일을 찾을 수 없습니다.');
     }
     const updated = await todoRepository.updateCompletion(todoId, !todo.isCompleted);
+    console.log(`[TODO] 완료 토글 성공 - todoId: ${todoId}, isCompleted: ${updated.isCompleted}`);
     return { ...updated, overdue: isOverdue(updated) };
   },
 };
